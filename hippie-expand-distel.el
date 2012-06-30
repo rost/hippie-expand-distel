@@ -44,20 +44,15 @@
                    (backward-sexp 1))
                  (point))))
       (he-init-string beg end)
-      (if (erl-is-module-function he-search-string)
-          (destructuring-bind (mod func beg)
-              (erl-destructure-module-function he-search-string beg)
-            (setq erl-complete-module-name (format "%s:" mod))
-            (setq he-expand-list
-                  (all-completions
-                   func
-                   (try-erl-complete he-search-string beg))))
-        (destructuring-bind (str beg)
-            (erl-destructure-module-function he-search-string beg)
-          (setq he-expand-list
-                (all-completions
-                 he-search-string
-                 (try-erl-complete str beg)))))))
+      (destructuring-bind (mod func beg)
+          (erl-destructure-module-function he-search-string beg)
+        (setq erl-complete-module-name (if (string= mod "")
+                                           mod
+                                         (format "%s:" mod)))
+        (setq he-expand-list
+              (all-completions
+               func
+               (try-erl-complete he-search-string beg))))))
   (while (and he-expand-list
               (he-string-member (car he-expand-list) he-tried-table))
     (setq he-expand-list (cdr he-expand-list)))
@@ -127,7 +122,7 @@ destructure it and return 'module' and 'function' separately."
             (function (match-string 2 str))
             (beg (+ beg (match-beginning 2))))
         (list module function beg))
-    (list str beg)))
+    (list "" str beg)))
 
 
 ;;; Sending and receiving messages
